@@ -1,12 +1,13 @@
 var issuesList;
 var issuesHTML;
+
 $(document).ready(function() {
     var webURL = window.location.href;
     var splitFlag = "http://";
     if (webURL.substring(0, 5) == "https") {
         splitFlag = "https://";
     }
-    var user = webURL.split("http://")[1].split(".")[0];
+    var user = webURL.split(splitFlag)[1].split(".")[0];
     user = 'yanghanqing';
     blogListURL = 'https://api.github.com/repos/' + user + '/' + user + '.github.io/contents/blog';
     issuesList = 'https://api.github.com/repos/' + user + '/' + user + '.github.io/issues';
