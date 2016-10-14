@@ -1,11 +1,13 @@
 var issuesList;
 var issuesHTML;
 $(document).ready(function() {
-
-
-
-    var user = window.location.href.split("http://")[1].split(".")[0];
-    //user = 'yanghanqing';
+    var webURL = window.location.href;
+    var splitFlag = "http://";
+    if (webURL.substring(0, 5) == "https") {
+        splitFlag = "https://";
+    }
+    var user = webURL.split("http://")[1].split(".")[0];
+    user = 'yanghanqing';
     blogListURL = 'https://api.github.com/repos/' + user + '/' + user + '.github.io/contents/blog';
     issuesList = 'https://api.github.com/repos/' + user + '/' + user + '.github.io/issues';
     issuesHTML = 'https://github.com/' + user + '/' + user + '.github.io/issues'
@@ -16,39 +18,16 @@ $(document).ready(function() {
     $("#commentsList").removeAttr('data_comments_url');
     $("#tips").html("我们不会获取您的用户名和密码,评论直接通过 HTTPS 与 Github API交互,<br>如果您开启了两步验证,请在博客的<a  target=\"_blank\" href=\"" + issuesHTML + "\">Github issues</a>下添加 Comment");
 
-    //set readme 
-    $.get(readmeURL, function(result) {
-        $("#title").show();
-        $("#article").html("");
+    var titleString = getTitleString();
 
-        testEditormdView = editormd.markdownToHTML("article", {
-            markdown: result, //+ "\r\n" + $("#append-test").text(),
-            // htmlDecode: true, // 开启 HTML 标签解析，为了安全性，默认不开启
-            htmlDecode: "style,script,iframe", // you can filter tags decode
-            //toc             : false,
-            tocm: true, // Using [TOCM]
-            //tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
-            //gfm             : false,
-            //tocDropdown     : true,
-            // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
-            emoji: true,
-            taskList: true,
-            tex: true, // 默认不解析
-            flowChart: true, // 默认不解析
-            sequenceDiagram: true, // 默认不解析
-        });
-
-
-
-    });
-
+    //set Blog list    
     $.getJSON(blogListURL, function(json) {
         for (var i = 0; i < json.length; i++) {
             var name = json[i].name; // Blog title
             var blogURL = json[i].download_url; //Blog Raw Url
             // add blog list elements
             var new_li = $("<li></li>");
-            var new_a = $("<a href=\"#\"></a>")
+            var new_a = $("<a></a>")
 
             var type = "markdown";
             // delete '.md'
@@ -58,17 +37,56 @@ $(document).ready(function() {
                 name = name.substr(0, name.length - 5);
                 type = "html";
             }
+            console.log(name);
+            console.log(titleString);
+            if (name == titleString) {
+                $("#title").text(name);
+                readmeURL = blogURL;
+            }
+
             new_a.text(name);
             //update content
             new_a.attr("data_blogURL", blogURL);
             new_a.attr("data_name", name);
+            //new_a.attr("href", "?title=" + name);
+            new_a.attr("href", "#");
             new_a.attr("data_type", type);
             new_a.attr("onclick", "setBlogTxt(this)");
             new_li.append(new_a);
             $('#nav').append(new_li);
 
         }
+
+
+        //set readme 
+        $.get(readmeURL, function(result) {
+            $("#title").show();
+            $("#article").html("");
+
+            testEditormdView = editormd.markdownToHTML("article", {
+                markdown: result, //+ "\r\n" + $("#append-test").text(),
+                // htmlDecode: true, // 开启 HTML 标签解析，为了安全性，默认不开启
+                htmlDecode: "style,script,iframe", // you can filter tags decode
+                //toc             : false,
+                tocm: true, // Using [TOCM]
+                //tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
+                //gfm             : false,
+                //tocDropdown     : true,
+                // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
+                emoji: true,
+                taskList: true,
+                tex: true, // 默认不解析
+                flowChart: true, // 默认不解析
+                sequenceDiagram: true, // 默认不解析
+            });
+
+
+
+        });
     });
+
+
+
 
 })
 
@@ -123,6 +141,7 @@ function setBlogTxt(obj) {
 }
 
 function setCommentURL(issuesList, blogName) {
+    $("#commentsList").show();
     console.log("获取并设置评论区");
 
 
@@ -252,4 +271,12 @@ function subComment() {
     } else {
         console.log("未开启评论")
     }
+}
+
+
+function getTitleString() {
+    var reg = new RegExp("(^|&)" + "title" + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return decodeURI(r[2]);
+    return null;
 }
