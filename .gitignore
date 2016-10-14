@@ -1,3 +1,6 @@
+.idea/
+*.iml
+
 # created by https://www.gitignore.io/api/macos
 
 ### macOS ###
