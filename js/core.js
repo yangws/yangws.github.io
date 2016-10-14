@@ -141,7 +141,7 @@ function setBlogTxt(obj) {
 }
 
 function setCommentURL(issuesList, blogName) {
-    $("#commentsList").show();
+    $("#comments").show();
     console.log("获取并设置评论区");
 
 
